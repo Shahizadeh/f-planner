@@ -29,20 +29,24 @@ function CurrentMonthBudgetForm({
         Current Budget: {formatCurrency(currentBudget, 0, defaultCurrency)}
       </p>
 
-      <label>
-        New Budget Amount
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          value={amount}
-          onChange={(event) => setAmount(event.target.value)}
-          placeholder="e.g. 2500"
-          required
-        />
-      </label>
+      <div className="planner-stack">
+        <label>
+          New Budget Amount
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            placeholder="e.g. 2500"
+            required
+          />
+        </label>
 
-      <button type="submit">Save Budget</button>
+        <div className="form-actions">
+          <button type="submit">Save Budget</button>
+        </div>
+      </div>
     </form>
   )
 }

@@ -1,14 +1,31 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import BottomNav from './layout/BottomNav'
 import LoadingScreen from './layout/LoadingScreen'
+import ThemeToggle from './layout/ThemeToggle'
 import { getCurrentMonthName, MONTHS } from '../features/planner/model/constants'
 import { useFinancialPlanner } from '../features/planner/model/useFinancialPlanner'
 import IndexPage from '../pages/IndexPage'
 import BudgetPage from '../pages/BudgetPage'
 import ExpensePage from '../pages/ExpensePage'
 
+function getInitialTheme() {
+  if (typeof window === 'undefined') {
+    return 'light'
+  }
+
+  const savedTheme = window.localStorage.getItem('fplanner-theme')
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    return savedTheme
+  }
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light'
+}
+
 function App() {
   const [activePage, setActivePage] = useState('index')
+  const [theme, setTheme] = useState(getInitialTheme)
   const {
     categories,
     expenses,
@@ -19,6 +36,11 @@ function App() {
     addExpense,
     isHydrated,
   } = useFinancialPlanner()
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme)
+    window.localStorage.setItem('fplanner-theme', theme)
+  }, [theme])
 
   const currentMonthName = getCurrentMonthName()
   const currentSummary =
@@ -76,8 +98,16 @@ function App() {
   return (
     <main className="page-shell app-shell">
       <section className="hero">
-        <p className="hero-tag">FPlanner</p>
-        <h1>Financial Planner</h1>
+        <div className="hero-top">
+          <div>
+            <p className="hero-tag">FPlanner</p>
+            <h1>Financial Planner</h1>
+          </div>
+          <ThemeToggle
+            theme={theme}
+            onToggle={() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))}
+          />
+        </div>
       </section>
 
       {content}

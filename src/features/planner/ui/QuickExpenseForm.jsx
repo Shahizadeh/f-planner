@@ -67,7 +67,7 @@ function QuickExpenseForm({ monthName, categories, onAddExpense }) {
       <p className="muted">Quick add for {monthName}</p>
 
       <div className="planner-grid">
-        <label>
+        <label className="planner-grid-full">
           Amount
           <input
             type="number"
@@ -117,7 +117,7 @@ function QuickExpenseForm({ monthName, categories, onAddExpense }) {
           ) : null}
         </label>
 
-        <label>
+        <label className="planner-grid-full">
           Note (optional)
           <input
             type="text"
