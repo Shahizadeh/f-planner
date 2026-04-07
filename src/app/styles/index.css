@@ -103,6 +103,14 @@ body {
   font-size: 2rem;
 }
 
+.app-version {
+  margin: 0.25rem 0 0;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-color);
+}
+
 .hero-copy {
   margin-top: 0.75rem;
   color: var(--muted-color);
@@ -327,6 +335,14 @@ select:focus {
 
 .bar-expense {
   background: color-mix(in srgb, #f87171 30%, transparent);
+}
+
+.bar-category {
+  background: color-mix(in srgb, #14b8a6 30%, transparent);
+}
+
+.bar-day {
+  background: color-mix(in srgb, #f59e0b 32%, transparent);
 }
 
 .status-pill {

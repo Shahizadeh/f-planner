@@ -113,6 +113,7 @@ export function useFinancialPlanner() {
     setExpenses((current) => [
       {
         id: getExpenseId(),
+        createdAt: new Date().toISOString(),
         month,
         amount,
         category: selectedCategory,

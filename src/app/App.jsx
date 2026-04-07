@@ -90,6 +90,8 @@ function App() {
       <IndexPage
         currentSummary={currentSummary}
         pastMonths={pastMonths}
+        currentMonthName={currentMonthName}
+        expenses={expenses}
         defaultCurrency={defaultCurrency}
       />
     )
@@ -102,6 +104,7 @@ function App() {
           <div>
             <p className="hero-tag">FPlanner</p>
             <h1>Financial Planner</h1>
+            <p className="app-version">v{__APP_VERSION__}</p>
           </div>
           <ThemeToggle
             theme={theme}
