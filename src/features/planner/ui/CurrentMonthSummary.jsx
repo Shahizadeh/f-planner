@@ -1,9 +1,39 @@
 import { formatCurrency } from '../model/formatters'
+import { Bar } from './chartSetup'
 
 function CurrentMonthSummary({ summary, defaultCurrency }) {
-  const maxValue = Math.max(summary.budget, summary.spent, 1)
-  const budgetWidth = (summary.budget / maxValue) * 100
-  const spentWidth = (summary.spent / maxValue) * 100
+  const data = {
+    labels: ['Budget', 'Expenses'],
+    datasets: [
+      {
+        label: summary.month,
+        data: [summary.budget, summary.spent],
+        borderRadius: 8,
+        backgroundColor: ['rgba(37, 99, 235, 0.45)', 'rgba(239, 68, 68, 0.45)'],
+      },
+    ],
+  }
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (context) => formatCurrency(context.parsed.x, 2, defaultCurrency),
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          callback: (value) => formatCurrency(value, 0, defaultCurrency),
+        },
+      },
+    },
+  }
 
   return (
     <section className="planner-chart">
@@ -12,13 +42,8 @@ function CurrentMonthSummary({ summary, defaultCurrency }) {
         {summary.status}
       </p>
 
-      <div className="bars compact">
-        <div className="bar bar-budget" style={{ width: `${budgetWidth}%` }}>
-          <span>Budget {formatCurrency(summary.budget, 0, defaultCurrency)}</span>
-        </div>
-        <div className="bar bar-expense" style={{ width: `${spentWidth}%` }}>
-          <span>Expenses {formatCurrency(summary.spent, 0, defaultCurrency)}</span>
-        </div>
+      <div className="chart-canvas chart-canvas-sm">
+        <Bar data={data} options={options} />
       </div>
 
       <p className="muted">

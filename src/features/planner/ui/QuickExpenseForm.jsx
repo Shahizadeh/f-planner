@@ -1,10 +1,13 @@
 import { useMemo, useState } from 'react'
+import { MONTHS } from '../model/constants'
 
 function QuickExpenseForm({ monthName, categories, onAddExpense }) {
   const [amount, setAmount] = useState('')
   const [categoryInput, setCategoryInput] = useState('')
   const [showSuggestions, setShowSuggestions] = useState(false)
   const [note, setNote] = useState('')
+  const [useCustomDateTime, setUseCustomDateTime] = useState(false)
+  const [customDateTime, setCustomDateTime] = useState('')
 
   const normalizedInput = categoryInput.trim().toLowerCase()
   const filteredCategories = useMemo(() => {
@@ -45,11 +48,24 @@ function QuickExpenseForm({ monthName, categories, onAddExpense }) {
       (item) => item.toLowerCase() === trimmedCategory.toLowerCase(),
     )
 
+    let expenseDate = new Date()
+    if (useCustomDateTime) {
+      const parsedCustomDate = new Date(customDateTime)
+      if (!customDateTime || Number.isNaN(parsedCustomDate.valueOf())) {
+        return
+      }
+
+      expenseDate = parsedCustomDate
+    }
+
+    const expenseMonth = MONTHS[expenseDate.getMonth()] || monthName
+
     const isAdded = onAddExpense({
-      month: monthName,
+      month: expenseMonth,
       amount: parsedAmount,
       category: matchedCategory || '',
       newCategory: matchedCategory ? '' : trimmedCategory,
+      createdAt: expenseDate.toISOString(),
       note,
     })
 
@@ -58,6 +74,8 @@ function QuickExpenseForm({ monthName, categories, onAddExpense }) {
       setCategoryInput('')
       setShowSuggestions(false)
       setNote('')
+      setCustomDateTime('')
+      setUseCustomDateTime(false)
     }
   }
 
@@ -67,6 +85,18 @@ function QuickExpenseForm({ monthName, categories, onAddExpense }) {
       <p className="muted">Quick add for {monthName}</p>
 
       <div className="planner-grid">
+        {useCustomDateTime ? (
+          <label className="planner-grid-full">
+            Expense Date & Time
+            <input
+              type="datetime-local"
+              value={customDateTime}
+              onChange={(event) => setCustomDateTime(event.target.value)}
+              required
+            />
+          </label>
+        ) : null}
+
         <label className="planner-grid-full">
           Amount
           <input
@@ -119,12 +149,21 @@ function QuickExpenseForm({ monthName, categories, onAddExpense }) {
 
         <label className="planner-grid-full">
           Note (optional)
-          <input
-            type="text"
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            placeholder="e.g. Coffee"
-          />
+          <div className="input-with-addon">
+            <input
+              type="text"
+              value={note}
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="e.g. Coffee"
+            />
+            <button
+              type="button"
+              className="ghost small-action addon-action"
+              onClick={() => setUseCustomDateTime((current) => !current)}
+            >
+              {useCustomDateTime ? 'Now' : 'Date/Time'}
+            </button>
+          </div>
         </label>
       </div>
 

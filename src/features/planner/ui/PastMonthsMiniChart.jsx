@@ -1,23 +1,37 @@
 import { toShortMonth } from '../model/constants'
+import { Bar } from './chartSetup'
 
 function PastMonthsMiniChart({ rows }) {
+  const data = {
+    labels: rows.map((row) => toShortMonth(row.month)),
+    datasets: [
+      {
+        label: 'Expenses',
+        data: rows.map((row) => row.spent),
+        borderRadius: 8,
+        backgroundColor: 'rgba(37, 99, 235, 0.45)',
+      },
+    ],
+  }
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+      },
+    },
+  }
+
   return (
     <section className="planner-chart">
       <h2>Past Months Snapshot</h2>
-      <div className="mini-chart" role="list">
-        {rows.map((row) => {
-          const limit = row.budget > 0 ? row.budget : Math.max(row.spent, 1)
-          const ratio = Math.min(row.spent / limit, 1)
-
-          return (
-            <article key={row.month} className="mini-item" role="listitem">
-              <span>{toShortMonth(row.month)}</span>
-              <div className="mini-track" aria-hidden="true">
-                <div className="mini-fill" style={{ height: `${Math.max(ratio * 100, 6)}%` }} />
-              </div>
-            </article>
-          )
-        })}
+      <div className="chart-canvas chart-canvas-sm">
+        <Bar data={data} options={options} />
       </div>
     </section>
   )

@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { DEFAULT_CATEGORIES, MONTHS, SUPPORTED_CURRENCIES } from './constants'
-import { loadPlannerState, savePlannerState } from './storage'
+import {
+  ensureCategory,
+  loadPlannerState,
+  saveDefaultCurrency,
+  saveExpense,
+  saveMonthlyBudget,
+} from './storage'
 
 function getInitialBudgetState() {
   return MONTHS.reduce((accumulator, month) => {
@@ -21,7 +27,7 @@ export function useFinancialPlanner() {
   const [budgetsByMonth, setBudgetsByMonth] = useState(getInitialBudgetState)
   const [expenses, setExpenses] = useState([])
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES)
-  const [defaultCurrency, setDefaultCurrency] = useState('USD')
+  const [defaultCurrency, setDefaultCurrencyState] = useState('USD')
   const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
@@ -52,7 +58,7 @@ export function useFinancialPlanner() {
           typeof savedState.defaultCurrency === 'string' &&
           SUPPORTED_CURRENCIES.includes(savedState.defaultCurrency)
         ) {
-          setDefaultCurrency(savedState.defaultCurrency)
+          setDefaultCurrencyState(savedState.defaultCurrency)
         }
       })
       .finally(() => {
@@ -66,31 +72,39 @@ export function useFinancialPlanner() {
     }
   }, [])
 
-  useEffect(() => {
-    if (!isHydrated) {
-      return
-    }
-
-    savePlannerState({
-      budgetsByMonth,
-      expenses,
-      categories,
-      defaultCurrency,
-    }).catch(() => {
-      // Keep UX uninterrupted if persistence fails.
-    })
-  }, [budgetsByMonth, expenses, categories, defaultCurrency, isHydrated])
-
   const setBudget = ({ month, amount }) => {
     setBudgetsByMonth((current) => ({
       ...current,
       [month]: amount,
     }))
+
+    saveMonthlyBudget(month, amount).catch(() => {
+      // Keep UX uninterrupted if persistence fails.
+    })
   }
 
-  const addExpense = ({ month, amount, category, newCategory, note }) => {
+  const setDefaultCurrency = (nextCurrency) => {
+    if (!SUPPORTED_CURRENCIES.includes(nextCurrency)) {
+      return
+    }
+
+    setDefaultCurrencyState(nextCurrency)
+    saveDefaultCurrency(nextCurrency).catch(() => {
+      // Keep UX uninterrupted if persistence fails.
+    })
+  }
+
+  const addExpense = ({ month, amount, category, newCategory, note, createdAt }) => {
     const trimmedCategory = newCategory.trim()
     const selectedCategory = trimmedCategory || category
+
+    let normalizedCreatedAt = new Date().toISOString()
+    if (typeof createdAt === 'string') {
+      const parsedDate = new Date(createdAt)
+      if (!Number.isNaN(parsedDate.valueOf())) {
+        normalizedCreatedAt = parsedDate.toISOString()
+      }
+    }
 
     if (!selectedCategory) {
       return false
@@ -106,21 +120,28 @@ export function useFinancialPlanner() {
           return current
         }
 
+        ensureCategory(trimmedCategory).catch(() => {
+          // Keep UX uninterrupted if persistence fails.
+        })
+
         return [...current, trimmedCategory]
       })
     }
 
-    setExpenses((current) => [
-      {
-        id: getExpenseId(),
-        createdAt: new Date().toISOString(),
-        month,
-        amount,
-        category: selectedCategory,
-        note: note.trim(),
-      },
-      ...current,
-    ])
+    const expenseRecord = {
+      id: getExpenseId(),
+      createdAt: normalizedCreatedAt,
+      month,
+      amount,
+      category: selectedCategory,
+      note: note.trim(),
+    }
+
+    setExpenses((current) => [expenseRecord, ...current])
+
+    saveExpense(expenseRecord).catch(() => {
+      // Keep UX uninterrupted if persistence fails.
+    })
 
     return true
   }

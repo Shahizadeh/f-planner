@@ -1,4 +1,5 @@
 import { formatCurrency } from '../model/formatters'
+import { Bar } from './chartSetup'
 
 function getExpenseDate(expense) {
   if (typeof expense.createdAt === 'string') {
@@ -38,7 +39,44 @@ function DailyExpenseChart({ expenses, defaultCurrency }) {
     .map(([day, total]) => ({ day: Number(day), total }))
     .sort((a, b) => a.day - b.day)
 
-  const maxTotal = rows.reduce((max, row) => Math.max(max, row.total), 1)
+  const data = {
+    labels: rows.map((row) => `Day ${row.day}`),
+    datasets: [
+      {
+        label: 'Expenses by Day',
+        data: rows.map((row) => row.total),
+        borderRadius: 8,
+        backgroundColor: 'rgba(245, 158, 11, 0.45)',
+      },
+    ],
+  }
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (context) => formatCurrency(context.parsed.y, 2, defaultCurrency),
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          autoSkip: true,
+          maxTicksLimit: 10,
+        },
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (value) => formatCurrency(value, 0, defaultCurrency),
+        },
+      },
+    },
+  }
 
   return (
     <section className="planner-chart">
@@ -46,20 +84,8 @@ function DailyExpenseChart({ expenses, defaultCurrency }) {
       {rows.length === 0 ? (
         <p className="muted">No dated expenses available for this month yet.</p>
       ) : (
-        <div className="chart-list" role="list">
-          {rows.map((row) => (
-            <article className="chart-row" key={row.day} role="listitem">
-              <header>
-                <h3>Day {row.day}</h3>
-                <p className="muted">
-                  {formatCurrency(row.total, 2, defaultCurrency)}
-                </p>
-              </header>
-              <div className="bar bar-day" style={{ width: `${(row.total / maxTotal) * 100}%` }}>
-                <span>{formatCurrency(row.total, 2, defaultCurrency)}</span>
-              </div>
-            </article>
-          ))}
+        <div className="chart-canvas chart-canvas-md">
+          <Bar data={data} options={options} />
         </div>
       )}
     </section>
