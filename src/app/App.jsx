@@ -34,6 +34,7 @@ function App() {
     setBudget,
     setDefaultCurrency,
     addExpense,
+    removeExpense,
     isHydrated,
   } = useFinancialPlanner()
 
@@ -83,6 +84,7 @@ function App() {
         expenses={expenses}
         defaultCurrency={defaultCurrency}
         onAddExpense={addExpense}
+        onDeleteExpense={removeExpense}
       />
     )
   } else {

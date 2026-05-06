@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { DEFAULT_CATEGORIES, MONTHS, SUPPORTED_CURRENCIES } from './constants'
 import {
+  deleteExpenseById,
   ensureCategory,
   loadPlannerState,
   saveDefaultCurrency,
@@ -146,6 +147,14 @@ export function useFinancialPlanner() {
     return true
   }
 
+  const removeExpense = (expenseId) => {
+    setExpenses((current) => current.filter((expense) => expense.id !== expenseId))
+
+    deleteExpenseById(expenseId).catch(() => {
+      // Keep UX uninterrupted if persistence fails.
+    })
+  }
+
   const monthlySummary = useMemo(
     () =>
       MONTHS.map((month) => {
@@ -182,5 +191,6 @@ export function useFinancialPlanner() {
     setBudget,
     setDefaultCurrency,
     addExpense,
+    removeExpense,
   }
 }

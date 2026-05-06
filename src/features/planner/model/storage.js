@@ -251,3 +251,15 @@ export async function saveExpense(expense) {
     }),
   )
 }
+
+export async function deleteExpenseById(expenseId) {
+  if (typeof expenseId !== 'string' || expenseId.trim().length === 0) {
+    return
+  }
+
+  await withDatabase((database) =>
+    runWriteTransaction(database, [EXPENSES_STORE], (transaction) => {
+      transaction.objectStore(EXPENSES_STORE).delete(expenseId)
+    }),
+  )
+}

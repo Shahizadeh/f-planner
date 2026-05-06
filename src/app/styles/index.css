@@ -402,6 +402,31 @@ select:focus {
   gap: 0.5rem;
 }
 
+.expenses-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.expenses-toolbar h2 {
+  margin: 0;
+}
+
+.date-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  color: var(--muted-color);
+  font-weight: 600;
+}
+
+.date-filter input {
+  min-width: 150px;
+}
+
 .expenses-list li {
   display: grid;
   gap: 0.2rem;
@@ -415,6 +440,18 @@ select:focus {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.expense-row-main {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.expense-row-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.35rem;
 }
 
 .expenses-list small,
@@ -557,6 +594,15 @@ button:focus-visible {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.35rem;
+  }
+
+  .expenses-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .date-filter input {
+    min-width: 0;
   }
 
   .mini-chart {
